@@ -2,9 +2,11 @@
 package myapp
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -70,7 +72,7 @@ func TestBarPathHandler_WithName(t *testing.T) {
 }
 
 // Foo는 Json 받아서 실행하는 함수였음!
-func TestFooHandler_WithoutJson(t *testing.T) {
+func TestFooHandler_WithJson(t *testing.T) {
 	assert := assert.New(t)
 
 	// 네트워크 사용 않고 그냥 사용할 수 있는 레코더
@@ -78,7 +80,9 @@ func TestFooHandler_WithoutJson(t *testing.T) {
 	// 새 호출
 	// goconvey에 보내는 건가봐.
 	// nil(input 없음)로 보내면 실패코드옴 -> 그래서 아래 assert라인 Badrequest 해야 pass됨.
-	req := httptest.NewRequest("GET", "/foo", nil)
+	req := httptest.NewRequest("POST", "/foo",
+		// NewReader로 이 string이 ioreader로 바뀜. (버퍼로 바껴서)
+		strings.NewReader(`{"first_name": "tucker", "last_name":"kim", "email":"tucker@naver.com"}`))
 
 	// mux 호출
 	// barHandler(res, req)
@@ -87,7 +91,21 @@ func TestFooHandler_WithoutJson(t *testing.T) {
 	mux := NewHttpHandler()
 	mux.ServeHTTP(res, req)
 
+	/*여기까지 보내기(요청)*/
+
+	/*여기부터 받기(응답)*/
+
 	//response
-	assert.Equal(http.StatusBadRequest, res.Code)
+	// JSON 있으니까 200코드로 올것 = StatusCreated
+	assert.Equal(http.StatusCreated, res.Code)
+
+	//데이터가 잘 왔는지 확인해보자.
+	user := new(User)
+	// response된 result를 user로 다시 디코더 하겠음.
+	err := json.NewDecoder(res.Body).Decode(user)
+	assert.Nil(err) //에러가 nil(없어야)함.
+
+	assert.Equal("tucker", user.FirstName)
+	assert.Equal("kim", user.LastName)
 
 }

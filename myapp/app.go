@@ -30,7 +30,7 @@ func (f *fooHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// json형태로 파싱을 해올것.
 	// Reader 인터페이스에 body넣어줌
 	// 읽어서 decode 할것.
-	err := json.NewDecoder(r.Body).Decode(user)  // 디코더 실패하면 에러
+	err := json.NewDecoder(r.Body).Decode(user) // 디코더 실패하면 에러
 	if err != nil {
 		// bad상태를 알려주고
 		w.WriteHeader(http.StatusBadRequest)
@@ -45,7 +45,8 @@ func (f *fooHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data, _ := json.Marshal(user)
 	// text형식 아니고 json형태로 전달 받기위해 json type 설정
 	w.Header().Add("content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	// 여기가 StatusCreated면 test.go에서도 StatusCreated임.
+	w.WriteHeader(http.StatusCreated)
 	// json은 string이기 때문에 바이너리 형태를 string으로 변환해서 넘겨주자
 	fmt.Fprint(w, string(data))
 
