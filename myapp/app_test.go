@@ -39,13 +39,13 @@ func TestIndexPathHandler(t *testing.T) {
 	assert.Equal("Hello World", string(data))
 }
 
-func TestBarPathHandler_WithoutName(t *testing.T) {
+func TestBarPathHandler_WithName(t *testing.T) {
 	assert := assert.New(t)
 
 	// 네트워크 사용 않고 그냥 사용할 수 있는 레코더
 	res := httptest.NewRecorder()
 	// 새 호출
-	req := httptest.NewRequest("GET", "/bar", nil)
+	req := httptest.NewRequest("GET", "/bar?name=tucker", nil)
 
 	// barHandler(res, req)
 	// mux를 이용해서 url 나눠주기.
@@ -66,5 +66,28 @@ func TestBarPathHandler_WithoutName(t *testing.T) {
 	data, _ := ioutil.ReadAll(res.Body)
 	// byte array 타입이기 때문에 string으로 바꿔서 비교
 	// app.go에서 bar는 !를 붙여 줬기 때문에 Hello World!라고 해줘야함.
-	assert.Equal("Hello World!", string(data))
+	assert.Equal("Hello tucker!", string(data))
+}
+
+// Foo는 Json 받아서 실행하는 함수였음!
+func TestFooHandler_WithoutJson(t *testing.T) {
+	assert := assert.New(t)
+
+	// 네트워크 사용 않고 그냥 사용할 수 있는 레코더
+	res := httptest.NewRecorder()
+	// 새 호출
+	// goconvey에 보내는 건가봐.
+	// nil(input 없음)로 보내면 실패코드옴 -> 그래서 아래 assert라인 Badrequest 해야 pass됨.
+	req := httptest.NewRequest("GET", "/foo", nil)
+
+	// mux 호출
+	// barHandler(res, req)
+	// mux를 이용해서 url 나눠주기.
+	// /bar로 안하고 /이걸로 하면 테스트에서 FAIL뜸
+	mux := NewHttpHandler()
+	mux.ServeHTTP(res, req)
+
+	//response
+	assert.Equal(http.StatusBadRequest, res.Code)
+
 }

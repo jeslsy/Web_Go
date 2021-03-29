@@ -30,7 +30,7 @@ func (f *fooHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// json형태로 파싱을 해올것.
 	// Reader 인터페이스에 body넣어줌
 	// 읽어서 decode 할것.
-	err := json.NewDecoder(r.Body).Decode(user)
+	err := json.NewDecoder(r.Body).Decode(user)  // 디코더 실패하면 에러
 	if err != nil {
 		// bad상태를 알려주고
 		w.WriteHeader(http.StatusBadRequest)
